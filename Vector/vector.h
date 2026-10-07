@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <type_traits>
 #include "memdata.h"
 
 template <typename T>
@@ -19,6 +20,55 @@ class TVector {
     void linearize();
 
 public:
+    template <typename Type>
+    class Iterator {
+        // if Type = T          -> VecPtr = TVector<T>*
+        // if Type = const T    -> VecPtr = const TVector<T>*
+        using VecPtr = std::conditional_t<std::is_const_v<Type>, const TVector<T>*, TVector<T>*>;
+
+        VecPtr _vec;
+        size_t _pos;
+
+        template <typename U> friend class Iterator;
+
+    public:
+        explicit Iterator(VecPtr v) : _vec(v), _pos(0) {}
+        Iterator(VecPtr v, size_t p) : _vec(v), _pos(p) {}
+        Iterator() : _vec(nullptr), _pos(0) {}
+        Iterator(const Iterator&) = default;
+        Iterator& operator=(const Iterator&) = default;
+
+        Type& operator*() const { return (*_vec)[_pos]; }
+        Type* operator->() const { return &(*_vec)[_pos]; }
+
+        Iterator& operator++() { ++_pos; return *this; }
+        Iterator  operator++(int) { Iterator tmp(*this); ++_pos; return tmp; }
+        Iterator& operator--() { --_pos; return *this; }
+        Iterator  operator--(int) { Iterator tmp(*this); --_pos; return tmp; }
+
+        Iterator  operator+ (int i) const { return Iterator(_vec, _pos + i); }
+        Iterator  operator- (int i) const { return Iterator(_vec, _pos - i); }
+        Iterator& operator+=(int i) { _pos += i; return *this; }
+        Iterator& operator-=(int i) { _pos -= i; return *this; }
+
+        template <typename OtherType>
+        bool operator==(const Iterator<OtherType>& o) const {
+            return _vec == o._vec && _pos == o._pos;
+        }
+
+        template <typename OtherType>
+        bool operator!=(const Iterator<OtherType>& o) const {
+            return !(*this == o);
+        }
+    };
+
+    template <typename Type>
+    friend typename TVector<T>::template Iterator<Type>
+        operator+(int n, const typename TVector<T>::template Iterator<Type>& it);
+
+    using iterator = Iterator<T>;
+    using const_iterator = Iterator<const T>;
+
     TVector(size_t size = 0);
     TVector(std::initializer_list<T>);
     TVector(T*, size_t);
@@ -28,14 +78,20 @@ public:
 
     inline bool is_empty() const noexcept { return _mem.is_empty(); }
     inline bool is_full() const noexcept { return _mem.is_full(); }
-
     inline size_t size() const noexcept { return _mem.size(); }
     inline size_t capacity() const noexcept { return _mem.capacity(); }
 
-    inline T front() const;
-    inline T back() const;
+    inline T  front() const;
+    inline T  back() const;
     inline T& front();
     inline T& back();
+
+    iterator begin() { return iterator(this, 0); }
+    iterator end() { return iterator(this, _mem._size); }
+    const_iterator begin()  const { return const_iterator(this, 0); }
+    const_iterator end()    const { return const_iterator(this, _mem._size); }
+    const_iterator cbegin() const { return begin(); }
+    const_iterator cend()   const { return end(); }
 
     void push_front(const T&);
     void push_back(const T&);
@@ -54,13 +110,11 @@ public:
     TVector& operator=(const TVector&) noexcept;
     TVector& operator=(TVector&&) noexcept;
 
-    T operator[](size_t) const noexcept;
     T& operator[](size_t) noexcept;
+    const T& operator[](size_t) const noexcept;
 
-    template <typename U>
-    friend std::ostream& operator<<(std::ostream&, const TVector<U>&);
-    template <typename U>
-    friend std::istream& operator>>(std::istream&, TVector<U>&);
+    template <typename U> friend std::ostream& operator<<(std::ostream&, const TVector<U>&);
+    template <typename U> friend std::istream& operator>>(std::istream&, TVector<U>&);
 };
 
 template <typename T>
@@ -100,20 +154,21 @@ TVector<T>::TVector(TVector&& other)
 }
 
 template <typename T>
-T TVector<T>::operator[](size_t idx) const noexcept {
+T& TVector<T>::operator[](size_t idx) noexcept {
+    static T empty = T();
     size_t cap = _mem._capacity;
     if (cap == 0)
-        return T();
-    idx = (_front + idx) % cap;
-    return _mem._data[idx];
+        return empty;
+    return _mem._data[(_front + idx) % cap];
 }
 
 template <typename T>
-T& TVector<T>::operator[](size_t idx) noexcept {
+const T& TVector<T>::operator[](size_t idx) const noexcept {
+    static const T empty = T();
     size_t cap = _mem._capacity;
-    if (cap != 0) 
-        idx = (_front + idx) % cap;
-    return _mem._data[idx];
+    if (cap == 0)
+        return empty;
+    return _mem._data[(_front + idx) % cap];
 }
 
 template <typename T>
@@ -152,7 +207,6 @@ void TVector<T>::push_front(const T& value) {
         _front = _back = 0;
         return;
     }
-
     if (is_full()) {
         linearize();
         size_t old_size = _mem._size;
@@ -176,7 +230,6 @@ void TVector<T>::push_back(const T& value) {
         _front = _back = 0;
         return;
     }
-
     if (is_full()) {
         linearize();
         size_t old_size = _mem._size;
@@ -234,16 +287,13 @@ template <typename T>
 void TVector<T>::pop_front() {
     if (is_empty())
         throw "Vector is empty";
-
     if (_mem._size == 1) {
         _mem.clear_memory();
         _front = _back = 0;
         return;
     }
-
     _front = (_front + 1) % _mem._capacity;
     _mem._size--;
-
     if (_mem._capacity > MEM_STEP && _mem._size + MEM_STEP <= _mem._capacity) {
         linearize();
         _mem.reset_memory(_mem._size, 0);
@@ -256,16 +306,13 @@ template <typename T>
 void TVector<T>::pop_back() {
     if (is_empty())
         throw "Vector is empty";
-
     if (_mem._size == 1) {
         _mem.clear_memory();
         _front = _back = 0;
         return;
     }
-
     _back = (_back == 0) ? _mem._capacity - 1 : _back - 1;
     _mem._size--;
-
     if (_mem._capacity > MEM_STEP && _mem._size + MEM_STEP <= _mem._capacity) {
         linearize();
         _mem.reset_memory(_mem._size, 0);
@@ -303,13 +350,12 @@ void TVector<T>::push_front(size_t n, const T& value) {
         return;
     if (is_empty()) {
         _mem.reset_memory(n, 0);
-        for (size_t i = 0; i < n; ++i) 
+        for (size_t i = 0; i < n; ++i)
             _mem._data[i] = value;
         _front = 0;
         _back = n - 1;
         return;
     }
-
     size_t old_size = _mem._size;
     if (old_size + n <= _mem._capacity) {
         for (size_t i = 0; i < n; ++i) {
@@ -321,7 +367,7 @@ void TVector<T>::push_front(size_t n, const T& value) {
     else {
         linearize();
         _mem.reset_memory(old_size + n, n);
-        for (size_t i = 0; i < n; ++i) 
+        for (size_t i = 0; i < n; ++i)
             _mem._data[i] = value;
         _front = 0;
         _back = old_size + n - 1;
@@ -334,13 +380,11 @@ void TVector<T>::push_back(size_t n, const T& value) {
         return;
     if (is_empty()) {
         _mem.reset_memory(n, 0);
-        for (size_t i = 0; i < n; ++i) 
-            _mem._data[i] = value;
+        for (size_t i = 0; i < n; ++i) _mem._data[i] = value;
         _front = 0;
         _back = n - 1;
         return;
     }
-
     size_t old_size = _mem._size;
     if (old_size + n <= _mem._capacity) {
         for (size_t i = 0; i < n; ++i) {
@@ -352,7 +396,7 @@ void TVector<T>::push_back(size_t n, const T& value) {
     else {
         linearize();
         _mem.reset_memory(old_size + n, 0);
-        for (size_t i = 0; i < n; ++i) 
+        for (size_t i = 0; i < n; ++i)
             _mem._data[old_size + i] = value;
         _front = 0;
         _back = old_size + n - 1;
@@ -365,7 +409,6 @@ void TVector<T>::insert(const T& value, size_t pos, size_t n) {
         throw "Invalid position";
     if (n == 0)
         return;
-
     size_t old_size = _mem._size;
     size_t cap = _mem._capacity;
 
@@ -398,16 +441,13 @@ void TVector<T>::pop_front(size_t n) {
         throw "Too many elements";
     if (n == 0)
         return;
-
     if (n == _mem._size) {
         _mem.clear_memory();
         _front = _back = 0;
         return;
     }
-
     _front = (_front + n) % _mem._capacity;
     _mem._size -= n;
-
     if (_mem._capacity > MEM_STEP && _mem._size + MEM_STEP <= _mem._capacity) {
         linearize();
         _mem.reset_memory(_mem._size, 0);
@@ -422,16 +462,13 @@ void TVector<T>::pop_back(size_t n) {
         throw "Too many elements";
     if (n == 0)
         return;
-
     if (n == _mem._size) {
         _mem.clear_memory();
         _front = _back = 0;
         return;
     }
-
     _mem._size -= n;
     _back = (_front + _mem._size - 1) % _mem._capacity;
-
     if (_mem._capacity > MEM_STEP && _mem._size + MEM_STEP <= _mem._capacity) {
         linearize();
         _mem.reset_memory(_mem._size, 0);
@@ -446,7 +483,6 @@ void TVector<T>::erase(size_t pos, size_t n) {
         return;
     if (pos + n > size())
         throw "Invalid position";
-
     size_t cap = _mem._capacity;
     size_t S = _mem._size;
     for (size_t i = pos; i + n < S; ++i) {
@@ -454,10 +490,8 @@ void TVector<T>::erase(size_t pos, size_t n) {
         size_t dst = (_front + i) % cap;
         _mem._data[dst] = _mem._data[src];
     }
-
     _mem._size -= n;
     _back = (_front + _mem._size - 1) % cap;
-
     if (cap > MEM_STEP && _mem._size + MEM_STEP <= cap) {
         linearize();
         _mem.reset_memory(_mem._size, 0);
@@ -485,6 +519,16 @@ TVector<T>& TVector<T>::operator=(TVector&& other) noexcept {
         other._front = other._back = 0;
     }
     return *this;
+}
+
+template <typename T>
+typename TVector<T>::template Iterator<T>
+operator+(int n, const typename TVector<T>::template Iterator<T>& it);
+
+template <typename T, typename Type>
+typename TVector<T>::template Iterator<Type>
+operator+(int n, const typename TVector<T>::template Iterator<Type>& it) {
+    return it + n;
 }
 
 template <typename T>

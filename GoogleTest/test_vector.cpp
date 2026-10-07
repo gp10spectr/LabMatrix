@@ -798,3 +798,87 @@ TEST(ClassVector, throw_when_try_pop_back_multiple_too_many) {
 }
 
 #endif
+
+TEST(ClassVector, iterator_basic_walk) {
+    TVector<double> v({ 1, 2, 3, 4, 5 });
+    double expected = 1;
+    for (TVector<double>::iterator it = v.begin(); it != v.end(); ++it) {
+        EXPECT_DOUBLE_EQ(expected, *it);
+        expected += 1;
+    }
+}
+
+TEST(ClassVector, iterator_write_through) {
+    TVector<int> v(5);
+    int val = 10;
+    for (TVector<int>::iterator it = v.begin(); it != v.end(); ++it) {
+        *it = val++;
+    }
+    for (size_t i = 0; i < v.size(); ++i)
+        EXPECT_EQ(static_cast<int>(10 + i), v[i]);
+}
+
+TEST(ClassVector, const_iterator_read) {
+    const TVector<double> v({ 1.5, 2.5, 3.5 });
+    double sum = 0;
+    for (TVector<double>::const_iterator it = v.begin(); it != v.end(); ++it) {
+        sum += *it;
+    }
+    EXPECT_DOUBLE_EQ(7.5, sum);
+}
+
+TEST(ClassVector, iterator_postfix_and_prefix) {
+    TVector<int> v({ 1, 2, 3 });
+    TVector<int>::iterator it = v.begin();
+    EXPECT_EQ(1, *it);
+    EXPECT_EQ(1, *(it++));   // постфикс — возвращает старое
+    EXPECT_EQ(2, *it);
+    EXPECT_EQ(3, *(++it));   // префикс — возвращает новое
+}
+
+TEST(ClassVector, iterator_arithmetic) {
+    TVector<int> v({ 1, 2, 3, 4, 5 });
+    TVector<int>::iterator it = v.begin();
+    EXPECT_EQ(3, *(it + 2));
+    EXPECT_EQ(5, *(it + 4));
+    EXPECT_EQ(1, *(it - 0));
+    it += 3;
+    EXPECT_EQ(4, *it);
+    it -= 2;
+    EXPECT_EQ(2, *it);
+}
+
+TEST(ClassVector, iterator_equality) {
+    TVector<int> v({ 1, 2, 3 });
+    TVector<int>::iterator a = v.begin();
+    TVector<int>::iterator b = v.begin();
+    EXPECT_TRUE(a == b);
+    ++a;
+    EXPECT_TRUE(a != b);
+    --a;
+    EXPECT_TRUE(a == b);
+}
+
+TEST(ClassVector, range_based_for) {
+    TVector<double> v({ 1, 2, 3, 4 });
+    double sum = 0;
+    for (const auto& x : v) sum += x;
+    EXPECT_DOUBLE_EQ(10.0, sum);
+
+    for (auto& x : v) x *= 2;
+    EXPECT_DOUBLE_EQ(2.0, v[0]);
+    EXPECT_DOUBLE_EQ(8.0, v[3]);
+}
+
+TEST(ClassVector, iterator_with_ring_buffer) {
+    TVector<int> v;
+    for (int i = 1; i <= 15; ++i) v.push_back(i);
+    v.pop_front();
+    v.push_back(16);   // front=1, back=0 -> кольцо
+
+    int expected = 2;
+    for (TVector<int>::iterator it = v.begin(); it != v.end(); ++it) {
+        EXPECT_EQ(expected++, *it);
+    }
+    EXPECT_EQ(17, expected);
+}
