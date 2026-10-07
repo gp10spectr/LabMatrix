@@ -882,3 +882,53 @@ TEST(ClassVector, iterator_with_ring_buffer) {
     }
     EXPECT_EQ(17, expected);
 }
+
+TEST(ClassVector, can_shrink_to_fit_on_empty) {
+    TVector<double> v;
+    v.shrink_to_fit();
+    EXPECT_EQ(0u, v.size());
+    EXPECT_EQ(0u, v.capacity());
+}
+
+TEST(ClassVector, can_shrink_to_fit_on_empty_after_clear) {
+    TVector<double> v({ 1.0, 2.0, 3.0 });
+    v.pop_back(3);
+    EXPECT_TRUE(v.is_empty());
+    v.shrink_to_fit();
+    EXPECT_EQ(0u, v.size());
+    EXPECT_EQ(0u, v.capacity());
+}
+
+TEST(ClassVector, shrink_to_fit_keeps_data_and_size) {
+    TVector<double> v({ 1.0, 2.0, 3.0, 4.0, 5.0 });
+    v.shrink_to_fit();
+    EXPECT_EQ(5u, v.size());
+    EXPECT_EQ(15u, v.capacity());
+    for (size_t i = 0; i < v.size(); ++i)
+        EXPECT_DOUBLE_EQ(static_cast<double>(i + 1), v[i]);
+}
+
+TEST(ClassVector, shrink_to_fit_reduces_capacity_to_minimum) {
+    TVector<double> v;
+    for (int i = 0; i < 46; ++i) v.push_back(static_cast<double>(i));
+    EXPECT_EQ(46u, v.size());
+    EXPECT_EQ(60u, v.capacity());
+    //shrink to fit doesnt make data worse
+    v.shrink_to_fit();
+    EXPECT_EQ(46u, v.size());
+    EXPECT_EQ(60u, v.capacity());
+    for (size_t i = 0; i < v.size(); ++i)
+        EXPECT_DOUBLE_EQ(static_cast<double>(i), v[i]);
+}
+
+TEST(ClassVector, shrink_to_fit_preserves_ring_order) {
+    TVector<double> v;
+    for (int i = 1; i <= 15; ++i) v.push_back(static_cast<double>(i));
+    v.pop_front(5);
+    v.push_back(16);
+    v.push_back(17);
+    v.shrink_to_fit();
+    EXPECT_EQ(12u, v.size());
+    for (size_t i = 0; i < v.size(); ++i)
+        EXPECT_DOUBLE_EQ(static_cast<double>(i + 6), v[i]);
+}

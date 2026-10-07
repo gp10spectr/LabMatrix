@@ -62,6 +62,8 @@ public:
         }
     };
 
+    void shrink_to_fit();
+
     template <typename Type>
     friend typename TVector<T>::template Iterator<Type>
         operator+(int n, const typename TVector<T>::template Iterator<Type>& it);
@@ -127,6 +129,24 @@ void TVector<T>::linearize() {
     for (size_t i = 0; i < _mem._size; ++i)
         _mem._data[i] = temp[i];
     delete[] temp;
+    _front = 0;
+    _back = _mem._size - 1;
+}
+
+template <typename T>
+void TVector<T>::shrink_to_fit() {
+    if (is_empty()) {
+        _mem.clear_memory();
+        _front = _back = 0;
+        return;
+    }
+
+    size_t target = calculate_capacity(static_cast<int>(_mem._size));
+    if (target == _mem._capacity)
+        return;
+
+    linearize();
+    _mem.reset_memory(_mem._size, 0);
     _front = 0;
     _back = _mem._size - 1;
 }
