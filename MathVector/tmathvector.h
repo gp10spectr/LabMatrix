@@ -1,0 +1,137 @@
+#pragma once
+#include "vector.h"
+#include <cmath>
+
+template <typename T>
+class TMathVector : public TVector<T> {
+public:
+    using TVector<T>::TVector;
+
+    TMathVector() = default;
+    TMathVector(const TVector<T>& other);
+    TMathVector(TVector<T>&& other);
+
+    TMathVector& operator+=(const TMathVector& other);
+    TMathVector& operator-=(const TMathVector& other);
+
+    template <typename Scalar>
+    TMathVector& operator*=(const Scalar& scalar);
+
+    template <typename Scalar>
+    TMathVector& operator/=(const Scalar& scalar);
+
+    T dot(const TMathVector& other) const;
+    double norm() const;
+};
+
+//template <class T, class U> -> 1 template with 2 parameters
+// 
+//template <class T>
+//template <class U>
+//-> template method for template class (in this context its vector)
+
+template <typename T>
+TMathVector<T> operator+(TMathVector<T> lhs, const TMathVector<T>& rhs);
+
+template <typename T>
+TMathVector<T> operator-(TMathVector<T> lhs, const TMathVector<T>& rhs);
+
+template <typename T, typename Scalar>
+TMathVector<T> operator*(const TMathVector<T>& v, const Scalar& scalar);
+
+template <typename T, typename Scalar>
+TMathVector<T> operator*(const Scalar& scalar, const TMathVector<T>& v);
+
+template <typename T, typename Scalar>
+TMathVector<T> operator/(const TMathVector<T>& v, const Scalar& scalar);
+
+template <typename T>
+TMathVector<T>::TMathVector(const TVector<T>& other) : TVector<T>(other) {}
+
+template <typename T>
+TMathVector<T>::TMathVector(TVector<T>&& other) : TVector<T>(std::move(other)) {}
+
+template <typename T>
+TMathVector<T>& TMathVector<T>::operator+=(const TMathVector& other) {
+    if ((*this).size() != other.size())
+        throw "TMathVector size are not equal";
+    for (size_t i = 0; i < (*this).size(); i++)
+        (*this)[i] += other[i];
+    return *this;
+}
+
+template <typename T>
+TMathVector<T>& TMathVector<T>::operator-=(const TMathVector& other) {
+    if ((*this).size() != other.size())
+        throw "TMathVector size are not equal";
+    for (size_t i = 0; i < (*this).size(); i++)
+        (*this)[i] -= other[i];
+    return *this;
+}
+
+template <typename T>
+template <typename Scalar>
+TMathVector<T>& TMathVector<T>::operator*=(const Scalar& scalar) {
+    for (size_t i = 0; i < (*this).size(); i++)
+        (*this)[i] *= scalar;
+    return *this;
+}
+
+template <typename T>
+template <typename Scalar>
+TMathVector<T>& TMathVector<T>::operator/=(const Scalar& scalar) {
+    for (size_t i = 0; i < (*this).size(); i++)
+        (*this)[i] /= scalar;
+    return *this;
+}
+
+template <typename T>
+T TMathVector<T>::dot(const TMathVector& other) const {
+    if ((*this).size() != other.size())
+        throw "TMathVector size are not equal";
+    T result = T();
+    for (size_t i = 0; i < (*this).size(); i++)
+        result += (*this)[i] * other[i];
+    return result;
+}
+
+template <typename T>
+double TMathVector<T>::norm() const {
+    double sum = 0.0;
+    for (size_t i = 0; i < (*this).size(); i++) {
+        double v = static_cast<double>((*this)[i]);
+        sum += v * v;
+    }
+    return std::sqrt(sum);
+}
+
+template <typename T>
+TMathVector<T> operator+(TMathVector<T> lhs, const TMathVector<T>& rhs) {
+    lhs += rhs;
+    return lhs;
+}
+
+template <typename T>
+TMathVector<T> operator-(TMathVector<T> lhs, const TMathVector<T>& rhs) {
+    lhs -= rhs;
+    return lhs;
+}
+
+template <typename T, typename Scalar>
+TMathVector<T> operator*(const TMathVector<T>& v, const Scalar& scalar) {
+    TMathVector<T> result(v);
+    result *= scalar;
+    return result;
+}
+
+template <typename T, typename Scalar>
+TMathVector<T> operator*(const Scalar& scalar, const TMathVector<T>& v) {
+    return v * scalar;
+}
+
+template <typename T, typename Scalar>
+TMathVector<T> operator/(const TMathVector<T>& v, const Scalar& scalar) {
+    TMathVector<T> result(v);
+    result /= scalar;
+    return result;
+}
