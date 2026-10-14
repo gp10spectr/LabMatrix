@@ -5,12 +5,13 @@
 template <typename T>
 class TMathVector : public TVector<T> {
 public:
-    using TVector<T>::TVector;
-
+    //using?
     TMathVector() = default;
-    TMathVector(const TVector<T>& other);
-    TMathVector(TVector<T>&& other);
-
+    TMathVector(size_t size) : TVector<T>(size) {}
+    TMathVector(std::initializer_list<T> list) : TVector<T>(list) {}
+    TMathVector(T* arr, size_t size) : TVector<T>(arr, size) {}
+    TMathVector(const TVector<T>& other) : TVector<T>(other) {}
+    TMathVector(TVector<T>&& other) : TVector<T>(std::move(other)) {}
     TMathVector& operator+=(const TMathVector& other);
     TMathVector& operator-=(const TMathVector& other);
 
@@ -23,33 +24,6 @@ public:
     T dot(const TMathVector& other) const;
     double norm() const;
 };
-
-//template <class T, class U> -> 1 template with 2 parameters
-// 
-//template <class T>
-//template <class U>
-//-> template method for template class (in this context its vector)
-
-template <typename T>
-TMathVector<T> operator+(TMathVector<T> lhs, const TMathVector<T>& rhs);
-
-template <typename T>
-TMathVector<T> operator-(TMathVector<T> lhs, const TMathVector<T>& rhs);
-
-template <typename T, typename Scalar>
-TMathVector<T> operator*(const TMathVector<T>& v, const Scalar& scalar);
-
-template <typename T, typename Scalar>
-TMathVector<T> operator*(const Scalar& scalar, const TMathVector<T>& v);
-
-template <typename T, typename Scalar>
-TMathVector<T> operator/(const TMathVector<T>& v, const Scalar& scalar);
-
-template <typename T>
-TMathVector<T>::TMathVector(const TVector<T>& other) : TVector<T>(other) {}
-
-template <typename T>
-TMathVector<T>::TMathVector(TVector<T>&& other) : TVector<T>(std::move(other)) {}
 
 template <typename T>
 TMathVector<T>& TMathVector<T>::operator+=(const TMathVector& other) {
