@@ -28,7 +28,7 @@ public:
 template <typename T>
 TMathVector<T>& TMathVector<T>::operator+=(const TMathVector& other) {
     if ((*this).size() != other.size())
-        throw "TMathVector size are not equal";
+        throw "vectors have different sizes";
     for (size_t i = 0; i < (*this).size(); i++)
         (*this)[i] += other[i];
     return *this;
@@ -37,7 +37,7 @@ TMathVector<T>& TMathVector<T>::operator+=(const TMathVector& other) {
 template <typename T>
 TMathVector<T>& TMathVector<T>::operator-=(const TMathVector& other) {
     if ((*this).size() != other.size())
-        throw "TMathVector size are not equal";
+        throw "vectors have different sizes";
     for (size_t i = 0; i < (*this).size(); i++)
         (*this)[i] -= other[i];
     return *this;
@@ -62,7 +62,7 @@ TMathVector<T>& TMathVector<T>::operator/=(const Scalar& scalar) {
 template <typename T>
 T TMathVector<T>::dot(const TMathVector& other) const {
     if ((*this).size() != other.size())
-        throw "TMathVector size are not equal";
+        throw "size are not equal";
     T result = T();
     for (size_t i = 0; i < (*this).size(); i++)
         result += (*this)[i] * other[i];

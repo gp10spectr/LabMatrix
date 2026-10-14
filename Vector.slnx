@@ -7,5 +7,6 @@
   <Project Path="GoogleTest/GoogleTest.vcxproj" Id="3d1bb74a-248d-4fb6-a781-b0eca0cedc06" />
   <Project Path="MathVector/MathVector.vcxproj" Id="4e656c65-68f2-4df5-bfd9-1c9899cd742c" />
   <Project Path="Matrix/Matrix.vcxproj" Id="a98160bc-acef-4a7f-9840-8cfbae8f8753" />
+  <Project Path="TriangleMatrix/TriangleMatrix.vcxproj" Id="56457f67-e74a-4d86-9733-f8e9295ebc40" />
   <Project Path="Vector/Vector.vcxproj" Id="a960c1bf-05d2-447f-923d-b10936fdf472" />
 </Solution>

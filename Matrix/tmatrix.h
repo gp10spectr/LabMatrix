@@ -6,6 +6,7 @@
 template <typename T>
 class TMatrix : public TMathVector<TMathVector<T>> {
 public:
+    //using?
     TMatrix() = default;
     TMatrix(size_t rows, size_t cols, const T& value = T());
     TMatrix(std::initializer_list<std::initializer_list<T>> list);
@@ -70,7 +71,7 @@ TMatrix<T> TMatrix<T>::transpose() const {
 template <typename T>
 T TMatrix<T>::trace() const {
     if (rows() != cols())
-        throw "TMatrix: trace requires square matrix";
+        throw "it is not a square matrix";
     T sum = T();
     for (size_t i = 0; i < rows(); i++)
         sum += (*this)[i][i];

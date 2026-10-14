@@ -42,7 +42,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\TriangleMatrix;C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -58,7 +58,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\TriangleMatrix;C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -73,7 +73,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\TriangleMatrix;C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -90,7 +90,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\TriangleMatrix;C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -112,6 +112,7 @@
     </ClCompile>
     <ClCompile Include="test_mathvector.cpp" />
     <ClCompile Include="test_matrix.cpp" />
+    <ClCompile Include="test_trianglematrix.cpp" />
     <ClCompile Include="test_vector.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +124,9 @@
     </ProjectReference>
     <ProjectReference Include="..\Matrix\Matrix.vcxproj">
       <Project>{a98160bc-acef-4a7f-9840-8cfbae8f8753}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TriangleMatrix\TriangleMatrix.vcxproj">
+      <Project>{56457f67-e74a-4d86-9733-f8e9295ebc40}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Vector\Vector.vcxproj">
       <Project>{a960c1bf-05d2-447f-923d-b10936fdf472}</Project>
