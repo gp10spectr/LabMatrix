@@ -797,8 +797,6 @@ TEST(ClassVector, throw_when_try_pop_back_multiple_too_many) {
     EXPECT_THROW(v.pop_back(5), const char*);
 }
 
-#endif
-
 TEST(ClassVector, iterator_basic_walk) {
     TVector<double> v({ 1, 2, 3, 4, 5 });
     double expected = 1;
@@ -932,3 +930,42 @@ TEST(ClassVector, shrink_to_fit_preserves_ring_order) {
     for (size_t i = 0; i < v.size(); ++i)
         EXPECT_DOUBLE_EQ(static_cast<double>(i + 6), v[i]);
 }
+
+TEST(ClassVector, ShrinkToFitOnEmptyVector) {
+    TVector<int> v;
+    ASSERT_NO_THROW(v.shrink_to_fit());
+    EXPECT_EQ(v.capacity(), 0);
+    EXPECT_EQ(v.size(), 0);
+}
+
+TEST(ClassVector, ShrinkToFitReducesCapacity) {
+    TVector<int> v;
+    // add 20 elements so capacity 30
+    for (int i = 0; i < 20; ++i) v.push_back(i);
+    EXPECT_EQ(v.capacity(), 30);
+
+    // remove 15 elements so size 5
+    for (int i = 0; i < 15; ++i) v.pop_back();
+    EXPECT_EQ(v.size(), 5);
+
+    // after shrink capacity 15
+    v.shrink_to_fit();
+    EXPECT_EQ(v.size(), 5);
+    EXPECT_EQ(v.capacity(), 15);
+
+    // check data
+    for (size_t i = 0; i < v.size(); ++i) {
+        EXPECT_EQ(v[i], static_cast<int>(i));
+    }
+}
+
+TEST(ClassVector, ShrinkToFitAfterPushFront) {
+    TVector<int> v;
+    for (int i = 0; i < 16; ++i) v.push_front(i);
+    v.pop_front(10); // size = 6 capacity = 30
+    v.shrink_to_fit(); // capacity 15
+    EXPECT_EQ(v.capacity(), 15);
+    EXPECT_EQ(v.size(), 6);
+}
+
+#endif

@@ -1,160 +1,191 @@
 #pragma once
-#include "tmatrix.h"
-#include <initializer_list>
 #include <iostream>
+#include <initializer_list>
+#include "tmatrix.h"
 
 template <typename T>
-class TTriangleMatrix {
-    TMathVector<TMathVector<T>> _rows;
-    size_t _n = 0;
-    bool _upper = true;
+class TTriangleMatrix;
 
+template <typename T>
+TTriangleMatrix<T> operator*(const T& scalar, const TTriangleMatrix<T>& mat);
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const TTriangleMatrix<T>& mat);
+
+template <typename T>
+class TTriangleMatrix : public TMatrix<T> {
 public:
-    class TRowProxy {
-        friend class TTriangleMatrix;
-        TMathVector<T>* _row;
-        size_t _i;
-        size_t _n;
-        bool _upper;
+    TTriangleMatrix(size_t dim = 0, const T& val = T());
+    TTriangleMatrix(std::initializer_list<std::initializer_list<T>> list);
 
-        TRowProxy(TMathVector<T>* row, size_t i, size_t n, bool upper) : _row(row), _i(i), _n(n), _upper(upper) {}
+    TTriangleMatrix(const TTriangleMatrix& other) = default;
+    TTriangleMatrix(TTriangleMatrix&& other) noexcept = default;
+    TTriangleMatrix& operator=(const TTriangleMatrix& other) = default;
+    TTriangleMatrix& operator=(TTriangleMatrix&& other) noexcept = default;
+    virtual ~TTriangleMatrix() = default;
 
-    public:
-        T& operator[](size_t j);
-        const T& operator[](size_t j) const;
-    };
+    size_t raw_row_size(size_t i) const;
 
-    size_t row_length(size_t i) const;
-    TTriangleMatrix() = default;
-    TTriangleMatrix(size_t n, const T& value = T(), bool upper = true);
-    TTriangleMatrix(std::initializer_list<std::initializer_list<T>> list, bool upper = true);
-    size_t size() const;
-    bool is_upper() const;
+    bool operator==(const TTriangleMatrix& other) const;
+    bool operator!=(const TTriangleMatrix& other) const;
 
-    TRowProxy operator[](size_t i);
-    TRowProxy operator[](size_t i) const;
+    TTriangleMatrix operator+(const TTriangleMatrix& other) const;
+    TTriangleMatrix operator-(const TTriangleMatrix& other) const;
+
+    TTriangleMatrix& operator*=(const T& scalar);
+    TTriangleMatrix operator*(const T& scalar) const;
+
+    TMathVector<T> operator*(const TMathVector<T>& vec) const;
+
+    TTriangleMatrix operator*(const TTriangleMatrix& other) const;
 
     template <typename U>
-    friend std::ostream& operator<<(std::ostream&, const TTriangleMatrix<U>&);
+    friend std::ostream& operator<<(std::ostream& os, const TTriangleMatrix<U>& mat);
 };
 
 template <typename T>
-typename TTriangleMatrix<T>::TRowProxy
-TTriangleMatrix<T>::operator[](size_t i) const {
-    return TRowProxy(const_cast<TMathVector<T>*>(&_rows[i]), i, _n, _upper);
-}
-
-template <typename T>
-std::ostream& operator<<(std::ostream&, const TTriangleMatrix<T>&);
-
-template <typename T>
-size_t TTriangleMatrix<T>::row_length(size_t i) const {
-    return _upper ? (_n - i) : (i + 1);
-}
-
-template <typename T>
-T& TTriangleMatrix<T>::TRowProxy::operator[](size_t j) {
-    if (_upper) {
-        if (j < _i) {
-            static T empty = T();
-            empty = T();
-            return empty;
-        }
-        return (*_row)[j - _i];
-    }
-    else {
-        if (j > _i) {
-            static T empty = T();
-            empty = T();
-            return empty;
-        }
-        return (*_row)[j];
+TTriangleMatrix<T>::TTriangleMatrix(size_t dim, const T& val) : TMatrix<T>(dim) {
+    for (size_t i = 0; i < dim; i++) {
+        // creates vector with(dim - i) and start_index = i
+        (*this)[i] = TMathVector<T>(dim - i, i, val);
     }
 }
 
 template <typename T>
-TTriangleMatrix<T>::TTriangleMatrix(size_t n, const T& value, bool upper)
-    : _n(n), _upper(upper), _rows()
-{
-    for (size_t i = 0; i < n; i++) {
-        size_t len = upper ? (n - i) : (i + 1);
-        TMathVector<T> row;
-        for (size_t k = 0; k < len; k++)
-            row.push_back(value);
-        _rows.push_back(row);
-    }
-}
-
-template <typename T>
-TTriangleMatrix<T>::TTriangleMatrix(std::initializer_list<std::initializer_list<T>> list, bool upper) : _upper(upper) {
-    _n = list.size();
-
-    for (const auto& row_data : list) {
-        if (row_data.size() != _n)
-            throw "not a square matrix";
-    }
-
+TTriangleMatrix<T>::TTriangleMatrix(std::initializer_list<std::initializer_list<T>> list) : TMatrix<T>(list.size()) {
+    size_t dim = list.size();
     size_t i = 0;
-    for (const auto& row_data : list) {
-        TMathVector<T> row;
-        if (upper) {
-            auto it = row_data.begin();
-            for (size_t k = 0; k < i; ++k)
-                it++;
-            for (size_t j = i; j < _n; j++, it++)
-                row.push_back(*it);
-        }
-        else {
-            auto it = row_data.begin();
-            for (size_t j = 0; j <= i; j++, it++)
-                row.push_back(*it);
-        }
-        if (upper) {
-            auto check = row_data.begin();
-            for (size_t j = 0; j < i; ++j, check++)
-                if (*check != T())
-                    throw "nonzero below diagonal in upper triangle";
-        }
-        else {
-            auto check = row_data.begin();
-            for (size_t j = 0; j < _n; ++j, check++) {
-                if (j <= i)
-                    continue;
-                if (*check != T())
-                    throw "nonzero above diagonal in lower triangle";
-            }
-        }
+    for (const auto& row_list : list) {
+        if (row_list.size() != dim)
+            throw "Initializer list rows must match dimension";
 
-        _rows.push_back(row);
+        TMathVector<T> row(dim - i, i);
+        size_t j = 0;
+        for (const auto& val : row_list) {
+            if (j >= i) {
+                row[j] = val;
+            }
+            ++j;
+        }
+        (*this)[i] = std::move(row);
         ++i;
     }
 }
 
 template <typename T>
-size_t TTriangleMatrix<T>::size() const {
-    return _n;
+size_t TTriangleMatrix<T>::raw_row_size(size_t i) const {
+    return (*this)[i].size();
 }
 
 template <typename T>
-bool TTriangleMatrix<T>::is_upper() const {
-    return _upper;
+bool TTriangleMatrix<T>::operator==(const TTriangleMatrix& other) const {
+    if (this->rows() != other.rows())
+        return false;
+    for (size_t i = 0; i < this->rows(); i++) {
+        if ((*this)[i] != other[i])
+            return false;
+    }
+    return true;
 }
 
 template <typename T>
-typename TTriangleMatrix<T>::TRowProxy TTriangleMatrix<T>::operator[](size_t i) {
-    return TRowProxy(&_rows[i], i, _n, _upper);
+bool TTriangleMatrix<T>::operator!=(const TTriangleMatrix& other) const {
+    return !(*this == other);
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const TTriangleMatrix<T>& m) {
-    for (size_t i = 0; i < m.size(); i++) {
+TTriangleMatrix<T> TTriangleMatrix<T>::operator+(const TTriangleMatrix& other) const {
+    if (this->rows() != other.rows())
+        throw "Matrix dimensions must match for addition";
+    size_t dim = this->rows();
+    TTriangleMatrix res(dim);
+    for (size_t i = 0; i < dim; i++) {
+        for (size_t j = i; j < dim; j++) {
+            res[i][j] = (*this)[i][j] + other[i][j];
+        }
+    }
+    return res;
+}
+
+template <typename T>
+TTriangleMatrix<T> TTriangleMatrix<T>::operator-(const TTriangleMatrix& other) const {
+    if (this->rows() != other.rows())
+        throw "Matrix dimensions must match for subtraction";
+    size_t dim = this->rows();
+    TTriangleMatrix res(dim);
+    for (size_t i = 0; i < dim; i++) {
+        for (size_t j = i; j < dim; j++) {
+            res[i][j] = (*this)[i][j] - other[i][j];
+        }
+    }
+    return res;
+}
+
+template <typename T>
+TTriangleMatrix<T>& TTriangleMatrix<T>::operator*=(const T& scalar) {
+    size_t dim = this->rows();
+    for (size_t i = 0; i < dim; i++) {
+        for (size_t j = i; j < dim; j++) {
+            (*this)[i][j] *= scalar;
+        }
+    }
+    return *this;
+}
+
+template <typename T>
+TTriangleMatrix<T> TTriangleMatrix<T>::operator*(const T& scalar) const {
+    TTriangleMatrix res = *this;
+    res *= scalar;
+    return res;
+}
+
+template <typename T>
+TMathVector<T> TTriangleMatrix<T>::operator*(const TMathVector<T>& vec) const {
+    if (this->rows() != vec.size())
+        throw "Matrix and vector dimensions mismatch";
+    size_t dim = this->rows();
+    TMathVector<T> res(dim, 0, T(0));
+    for (size_t i = 0; i < dim; i++) {
+        for (size_t j = i; j < dim; j++) {
+            res[i] += (*this)[i][j] * vec[j];
+        }
+    }
+    return res;
+}
+
+template <typename T>
+TTriangleMatrix<T> TTriangleMatrix<T>::operator*(const TTriangleMatrix& other) const {
+    if (this->rows() != other.rows())
+        throw "Matrix dimensions must match for multiplication";
+    size_t dim = this->rows();
+    TTriangleMatrix res(dim, T(0));
+    for (size_t i = 0; i < dim; i++) {
+        for (size_t j = i; j < dim; j++) {
+            T sum = T(0);
+            for (size_t k = i; k <= j; ++k) {
+                sum += (*this)[i][k] * other[k][j];
+            }
+            res[i][j] = sum;
+        }
+    }
+    return res;
+}
+
+template <typename T>
+TTriangleMatrix<T> operator*(const T& scalar, const TTriangleMatrix<T>& mat) {
+    return mat * scalar;
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const TTriangleMatrix<T>& mat) {
+    for (size_t i = 0; i < mat.rows(); i++) {
         os << "[ ";
-        for (size_t j = 0; j < m.size(); j++) {
-            os << m[i][j];
-            if (j != m.size() - 1) os << " ";
+        for (size_t j = 0; j < mat.cols(); j++) {
+            os << mat[i][j];
+            if (j != mat.cols() - 1) os << " ";
         }
         os << " ]";
-        if (i != m.size() - 1) os << "\n";
+        if (i != mat.rows() - 1) os << "\n";
     }
     return os;
 }

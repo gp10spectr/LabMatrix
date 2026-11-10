@@ -77,7 +77,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\TriangleMatrix;C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -96,7 +96,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\TriangleMatrix;C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\TriangleMatrix;C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,7 +132,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Пользователь\source\repos\Vector\TriangleMatrix;C:\Users\Пользователь\source\repos\Vector\Matrix;C:\Users\Пользователь\source\repos\Vector\MathVector;C:\Users\Пользователь\source\repos\Vector\Vector;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,6 +146,15 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MathVector\MathVector.vcxproj">
+      <Project>{4e656c65-68f2-4df5-bfd9-1c9899cd742c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Matrix\Matrix.vcxproj">
+      <Project>{a98160bc-acef-4a7f-9840-8cfbae8f8753}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TriangleMatrix\TriangleMatrix.vcxproj">
+      <Project>{56457f67-e74a-4d86-9733-f8e9295ebc40}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Vector\Vector.vcxproj">
       <Project>{a960c1bf-05d2-447f-923d-b10936fdf472}</Project>
     </ProjectReference>
